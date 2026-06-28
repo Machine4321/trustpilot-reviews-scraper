@@ -1,0 +1,8 @@
+{
+    "actorSpecification": 1,
+    "name": "trustpilot-reviews-scraper",
+    "title": "Trustpilot Reviews Scraper (Ultra-Fast & Proxy-Free)",
+    "description": "Extracts ratings, review text, headers, response comments, and author details from Trustpilot at lightning speed. Zero proxy fees, no headless browser needed.",
+    "version": "0.1",
+    "dockerfile": "./.actor/Dockerfile"
+}

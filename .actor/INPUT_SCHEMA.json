@@ -1,0 +1,48 @@
+{
+    "title": "Trustpilot Reviews Scraper Input Schema",
+    "type": "object",
+    "schemaVersion": 1,
+    "properties": {
+        "domain": {
+            "title": "Domain Name",
+            "type": "string",
+            "description": "The company domain name whose reviews to scrape (e.g. 'apify.com', 'amazon.com', 'google.com').",
+            "editor": "textfield",
+            "prefill": "apify.com"
+        },
+        "maxPages": {
+            "title": "Maximum Pages",
+            "type": "integer",
+            "description": "Maximum number of pages of reviews to scrape (each page contains up to 20 reviews).",
+            "default": 5,
+            "minimum": 1,
+            "prefill": 5
+        },
+        "minRating": {
+            "title": "Minimum Rating",
+            "type": "integer",
+            "description": "Filter reviews by a minimum star rating (1-5). Only reviews with this rating or higher will be extracted.",
+            "enum": [1, 2, 3, 4, 5],
+            "enumTitles": [
+                "1 Star or more (All)",
+                "2 Stars or more",
+                "3 Stars or more",
+                "4 Stars or more",
+                "5 Stars only"
+            ],
+            "default": 1
+        },
+        "proxyConfiguration": {
+            "title": "Proxy Configuration",
+            "type": "object",
+            "description": "Specifies proxy servers that will be used by the scraper to bypass blocks. Using the default Apify proxy is recommended.",
+            "prefill": {
+                "useApifyProxy": true
+            },
+            "editor": "proxy"
+        }
+    },
+    "required": [
+        "domain"
+    ]
+}
