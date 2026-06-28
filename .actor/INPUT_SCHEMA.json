@@ -20,10 +20,10 @@
         },
         "minRating": {
             "title": "Minimum Rating",
-            "type": "integer",
+            "type": "string",
             "description": "Filter reviews by a minimum star rating (1-5). Only reviews with this rating or higher will be extracted.",
             "editor": "select",
-            "enum": [1, 2, 3, 4, 5],
+            "enum": ["1", "2", "3", "4", "5"],
             "enumTitles": [
                 "1 Star or more (All)",
                 "2 Stars or more",
@@ -31,7 +31,7 @@
                 "4 Stars or more",
                 "5 Stars only"
             ],
-            "default": 1
+            "default": "1"
         },
         "proxyConfiguration": {
             "title": "Proxy Configuration",
