@@ -35,3 +35,15 @@
         },
         "proxyConfiguration": {
             "title": "Proxy Configuration",
+            "type": "object",
+            "description": "Specifies proxy servers that will be used by the scraper to bypass blocks. Using the default Apify proxy is recommended.",
+            "prefill": {
+                "useApifyProxy": true
+            },
+            "editor": "proxy"
+        }
+    },
+    "required": [
+        "domain"
+    ]
+}
