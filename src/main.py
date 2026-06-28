@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 import httpx
 from apify import Actor
 
+
 # List of browser-like User-Agents
 USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -18,6 +19,7 @@ USER_AGENTS = [
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"
 ]
 
+
 def clean_domain_name(domain_input: str) -> str:
     """Normalizes raw input or full Trustpilot URL into a clean domain name."""
     clean = domain_input.strip().lower()
@@ -28,6 +30,7 @@ def clean_domain_name(domain_input: str) -> str:
     # Strip trailing paths, queries, or hashes
     clean = re.split(r'[/?#]', clean)[0]
     return clean
+
 
 def map_review_item(review: dict, company_name: str, company_id: str, company_domain: str) -> dict:
     """Maps raw Trustpilot NEXT_DATA review structure to a clean flat JSON output."""
@@ -58,6 +61,7 @@ def map_review_item(review: dict, company_name: str, company_id: str, company_do
         "replyDate": reply.get("publishedDate")
     }
 
+
 async def main() -> None:
     async with Actor:
         # Get and parse input
@@ -71,7 +75,7 @@ async def main() -> None:
 
         clean_domain = clean_domain_name(raw_domain)
         max_pages = actor_input.get("maxPages", 5)
-        min_rating = actor_input.get("minRating", 1)
+        min_rating = int(actor_input.get("minRating", 1))
         proxy_config = actor_input.get("proxyConfiguration")
 
         Actor.log.info(f"Starting Trustpilot Scraper for domain: '{clean_domain}'")
