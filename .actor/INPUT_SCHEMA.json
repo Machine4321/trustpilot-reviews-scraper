@@ -22,6 +22,7 @@
             "title": "Minimum Rating",
             "type": "integer",
             "description": "Filter reviews by a minimum star rating (1-5). Only reviews with this rating or higher will be extracted.",
+            "editor": "select",
             "enum": [1, 2, 3, 4, 5],
             "enumTitles": [
                 "1 Star or more (All)",
@@ -34,15 +35,3 @@
         },
         "proxyConfiguration": {
             "title": "Proxy Configuration",
-            "type": "object",
-            "description": "Specifies proxy servers that will be used by the scraper to bypass blocks. Using the default Apify proxy is recommended.",
-            "prefill": {
-                "useApifyProxy": true
-            },
-            "editor": "proxy"
-        }
-    },
-    "required": [
-        "domain"
-    ]
-}
