@@ -119,6 +119,8 @@ async def main() -> None:
                         break
                     elif response.status_code != 200:
                         Actor.log.error(f"Failed to fetch page {page}. Status Code: {response.status_code}")
+                        Actor.log.error(f"Response headers: {response.headers}")
+                        Actor.log.error(f"Response body (first 500 chars): {response.text[:500]}")
                         break
 
                     soup = BeautifulSoup(response.text, "html.parser")
@@ -126,6 +128,8 @@ async def main() -> None:
                     
                     if not script_tag:
                         Actor.log.error(f"Could not find __NEXT_DATA__ JSON tag on page {page}!")
+                        Actor.log.error(f"Response headers: {response.headers}")
+                        Actor.log.error(f"Response body (first 500 chars): {response.text[:500]}")
                         if "captcha" in response.text.lower() or "cloudflare" in response.text.lower():
                             Actor.log.error("Scraper seems to be blocked by bot protection. Please use proxies.")
                         break
