@@ -134,8 +134,9 @@ async def main() -> None:
                             response = 404
                             break
                         
-                        # Wait for script tag to load (longer timeout 30s for headful WAF solving to finish)
-                        await web_page.wait_for_selector("script#__NEXT_DATA__", timeout=30000)
+                        # Wait for script tag to be ATTACHED to the DOM (state="attached" is required because script tags are hidden!)
+                        # We also increase timeout to 30s to allow headful WAF solving to finish
+                        await web_page.wait_for_selector("script#__NEXT_DATA__", state="attached", timeout=30000)
                         
                         script_content = await web_page.eval_on_selector("script#__NEXT_DATA__", "el => el.textContent")
                         if script_content:
