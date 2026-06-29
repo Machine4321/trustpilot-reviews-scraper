@@ -87,8 +87,9 @@ async def main() -> None:
         
         async with async_playwright() as p:
             # Configure browser launch options
+            # Set headless to False to run headful Chromium inside Xvfb (to easily pass anti-bot WAF checks!)
             launch_options = {
-                "headless": True
+                "headless": False
             }
             if proxy_url:
                 parsed = urlparse(proxy_url)
@@ -133,8 +134,8 @@ async def main() -> None:
                             response = 404
                             break
                         
-                        # Wait for script tag to load (helps bypass WAF challenge redirection)
-                        await web_page.wait_for_selector("script#__NEXT_DATA__", timeout=15000)
+                        # Wait for script tag to load (longer timeout 30s for headful WAF solving to finish)
+                        await web_page.wait_for_selector("script#__NEXT_DATA__", timeout=30000)
                         
                         script_content = await web_page.eval_on_selector("script#__NEXT_DATA__", "el => el.textContent")
                         if script_content:
