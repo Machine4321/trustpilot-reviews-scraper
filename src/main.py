@@ -113,7 +113,8 @@ async def main() -> None:
                 try:
                     # Let curl_cffi handle headers automatically to match TLS fingerprint
                     # Pass proxies directly to get method
-                    response = await client.get(url, impersonate="chrome120", proxies=proxies)
+                    # Disable HTTP/2 by specifying V1_1 to avoid proxy connection reset issues
+                    response = await client.get(url, impersonate="chrome120", proxies=proxies, http_version=curl_requests.HttpVersion.V1_1)
                     
                     if response.status_code == 404:
                         Actor.log.warning(f"Page {page} returned 404. Stopping scrape.")
