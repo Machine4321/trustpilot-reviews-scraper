@@ -1,5 +1,5 @@
-# Use the official Apify Python base image
-FROM apify/actor-python:3.11
+# Use the official Apify Python Playwright base image
+FROM apify/actor-python-playwright:3.11
 
 # Copy requirements.txt first to leverage Docker cache
 COPY requirements.txt ./
