@@ -84,7 +84,7 @@ async def main() -> None:
         # Set up proxy URL if configured
         proxy_url = None
         if proxy_config:
-            proxy_configuration = await Actor.create_proxy_configuration(proxy_config)
+            proxy_configuration = await Actor.create_proxy_configuration(actor_proxy_input=proxy_config)
             if proxy_configuration:
                 proxy_url = await proxy_configuration.new_url()
                 Actor.log.info("Using proxy configuration.")
