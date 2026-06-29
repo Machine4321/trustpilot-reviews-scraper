@@ -98,13 +98,18 @@ async def main() -> None:
         page = 1
         total_extracted = 0
 
-        while page <= max_pages:
-            url = f"https://www.trustpilot.com/review/{clean_domain}?page={page}"
-            Actor.log.info(f"Scraping page {page}: {url}")
+        # Subdomains to cycle through to bypass AWS WAF challenge page
+        subdomains = ["www", "uk", "de", "nl", "dk", "fr", "it", "es"]
 
+        while page <= max_pages:
             response = None
             success = False
-            for attempt in range(1, 11):  # 10 attempts to find a non-blocked proxy IP
+            
+            for attempt in range(1, 17):  # 16 attempts
+                subdomain = subdomains[(attempt - 1) % len(subdomains)]
+                url = f"https://{subdomain}.trustpilot.com/review/{clean_domain}?page={page}"
+                Actor.log.info(f"Scraping page {page} (attempt {attempt}, domain: {subdomain}.trustpilot.com): {url}")
+                
                 try:
                     current_proxies = None
                     if proxy_config and proxy_configuration:
