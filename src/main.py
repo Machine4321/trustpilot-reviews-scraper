@@ -110,24 +110,9 @@ async def main() -> None:
                 url = f"https://www.trustpilot.com/review/{clean_domain}?page={page}"
                 Actor.log.info(f"Scraping page {page}: {url}")
 
-                # Configure realistic browser headers
-                headers = {
-                    "User-Agent": random.choice(USER_AGENTS),
-                    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
-                    "Accept-Language": "en-US,en;q=0.9",
-                    "Accept-Encoding": "gzip, deflate, br",
-                    "Sec-Ch-Ua": '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
-                    "Sec-Ch-Ua-Mobile": "?0",
-                    "Sec-Ch-Ua-Platform": '"Windows"',
-                    "Sec-Fetch-Dest": "document",
-                    "Sec-Fetch-Mode": "navigate",
-                    "Sec-Fetch-Site": "none",
-                    "Sec-Fetch-User": "?1",
-                    "Upgrade-Insecure-Requests": "1"
-                }
-
                 try:
-                    response = await client.get(url, headers=headers, impersonate="chrome110")
+                    # Let curl_cffi handle headers automatically to match TLS fingerprint
+                    response = await client.get(url, impersonate="chrome110")
                     
                     if response.status_code == 404:
                         Actor.log.warning(f"Page {page} returned 404. Stopping scrape.")
@@ -141,49 +126,52 @@ async def main() -> None:
                     
                     if not script_tag:
                         Actor.log.error(f"Could not find __NEXT_DATA__ JSON tag on page {page}!")
-                        # If we can't find it, we might be blocked by Cloudflare (403 or captcha)
                         if "captcha" in response.text.lower() or "cloudflare" in response.text.lower():
                             Actor.log.error("Scraper seems to be blocked by bot protection. Please use proxies.")
                         break
 
                     data = json.loads(script_tag.string)
-                    page_props = data.get("props", {}).get("pageProps", {})
+                    props = data.get("props", {})
+                    page_props = props.get("pageProps", {})
                     
-                    # Extract business unit metadata
-                    business_unit = page_props.get("businessUnit", {})
-                    company_name = business_unit.get("displayName") or clean_domain
-                    company_id = business_unit.get("id") or ""
-
+                    # Extract business unit details
+                    biz_unit = page_props.get("businessUnit", {})
+                    company_name = biz_unit.get("displayName", "Unknown")
+                    company_id = biz_unit.get("id", "")
+                    
+                    # Extract reviews array
                     reviews = page_props.get("reviews", [])
-                    
                     if not reviews:
-                        Actor.log.info(f"No reviews found on page {page}. Scraping complete.")
+                        Actor.log.info(f"No reviews found on page {page}. Stopping.")
                         break
-
-                    # Map and filter reviews
-                    page_results = []
-                    for r in reviews:
-                        rating = r.get("rating", 0)
+                    
+                    valid_reviews = []
+                    for review in reviews:
+                        rating = review.get("rating", 0)
                         if rating >= min_rating:
-                            mapped = map_review_item(r, company_name, company_id, clean_domain)
-                            page_results.append(mapped)
-
-                    if page_results:
-                        await Actor.push_data(page_results)
-                        total_extracted += len(page_results)
-                        Actor.log.info(f"Successfully extracted {len(page_results)} reviews from page {page}.")
+                            mapped = map_review_item(review, company_name, company_id, clean_domain)
+                            valid_reviews.append(mapped)
+                    
+                    if valid_reviews:
+                        await Actor.push_data(valid_reviews)
+                        total_extracted += len(valid_reviews)
+                        Actor.log.info(f"Successfully extracted {len(valid_reviews)} reviews from page {page}")
                     else:
-                        Actor.log.info(f"No reviews matched the minimum rating filter of {min_rating} on page {page}.")
-
-                    # Sleep briefly between requests to mimic human browsing behavior
-                    await asyncio.sleep(random.uniform(1.0, 2.5))
-                    page += 1
-
+                        Actor.log.info(f"No reviews matching rating >= {min_rating} on page {page}")
+                    
+                    # Check if we have reached the last page
+                    pagination = page_props.get("filters", {}).get("pagination", {})
+                    next_page = pagination.get("nextPage")
+                    if not next_page:
+                        Actor.log.info("Reached the last page of reviews.")
+                        break
+                        
                 except Exception as e:
-                    Actor.log.error(f"An error occurred while scraping page {page}: {str(e)}")
+                    Actor.log.error(f"An error occurred while scraping page {page}: {e}")
                     break
-
-        Actor.log.info(f"Scrape completed. Total reviews extracted: {total_extracted}")
-
-if __name__ == "__main__":
-    asyncio.run(main())
+                
+                page += 1
+                # Small polite delay between requests
+                await asyncio.sleep(random.uniform(1.0, 2.5))
+            
+            Actor.log.info(f"Scrape completed. Total reviews extracted: {total_extracted}")
