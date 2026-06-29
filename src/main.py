@@ -116,7 +116,7 @@ async def main() -> None:
                         }
                     
                     async with curl_requests.AsyncSession(timeout=15.0) as client:
-                        response = await client.get(url, impersonate="chrome120", proxies=current_proxies, http_version=curl_requests.HttpVersion.V1_1)
+                        response = await client.get(url, impersonate="chrome120", proxies=current_proxies, http_version=2)
                     
                     if response.status_code == 200:
                         if "__NEXT_DATA__" in response.text:
