@@ -111,17 +111,20 @@ async def main() -> None:
                 Actor.log.info(f"Scraping page {page} (attempt {attempt}, domain: {subdomain}.trustpilot.com): {url}")
                 
                 try:
-                    current_proxies = None
+                    current_proxy_url = None
                     if proxy_config and proxy_configuration:
                         # Re-request a new proxy URL to force rotation
                         current_proxy_url = await proxy_configuration.new_url()
-                        current_proxies = {
-                            "http": current_proxy_url,
-                            "https": current_proxy_url
-                        }
                     
                     async with curl_requests.AsyncSession(timeout=15.0) as client:
-                        response = await client.get(url, impersonate="chrome120", proxies=current_proxies, http_version=2)
+                        # Use proxy=current_proxy_url (singular string parameter) for curl_cffi!
+                        # Disable HTTP/2 by specifying V1_1 to avoid proxy connection reset issues
+                        response = await client.get(
+                            url, 
+                            impersonate="chrome120", 
+                            proxy=current_proxy_url, 
+                            http_version=2
+                        )
                     
                     if response.status_code == 200:
                         if "__NEXT_DATA__" in response.text:
