@@ -105,14 +105,15 @@ async def main() -> None:
                 "https": proxy_url
             }
 
-        async with curl_requests.AsyncSession(proxies=proxies, timeout=15.0) as client:
+        async with curl_requests.AsyncSession(timeout=15.0) as client:
             while page <= max_pages:
                 url = f"https://www.trustpilot.com/review/{clean_domain}?page={page}"
                 Actor.log.info(f"Scraping page {page}: {url}")
 
                 try:
                     # Let curl_cffi handle headers automatically to match TLS fingerprint
-                    response = await client.get(url, impersonate="chrome110")
+                    # Pass proxies directly to get method
+                    response = await client.get(url, impersonate="chrome120", proxies=proxies)
                     
                     if response.status_code == 404:
                         Actor.log.warning(f"Page {page} returned 404. Stopping scrape.")
