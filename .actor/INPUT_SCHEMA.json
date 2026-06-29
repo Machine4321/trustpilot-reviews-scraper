@@ -40,6 +40,9 @@
             "prefill": {
                 "useApifyProxy": true
             },
+            "default": {
+                "useApifyProxy": true
+            },
             "editor": "proxy"
         }
     },
