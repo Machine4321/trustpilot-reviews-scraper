@@ -4,7 +4,7 @@ import random
 import re
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
-import httpx
+from curl_cffi import requests as curl_requests
 from apify import Actor
 
 
@@ -98,14 +98,14 @@ async def main() -> None:
         total_extracted = 0
         
         # Configure client with optional proxy
-        client_kwargs = {
-            "follow_redirects": True,
-            "timeout": 15.0
-        }
+        proxies = None
         if proxy_url:
-            client_kwargs["proxy"] = proxy_url
+            proxies = {
+                "http": proxy_url,
+                "https": proxy_url
+            }
 
-        async with httpx.AsyncClient(**client_kwargs) as client:
+        async with curl_requests.AsyncSession(proxies=proxies, timeout=15.0) as client:
             while page <= max_pages:
                 url = f"https://www.trustpilot.com/review/{clean_domain}?page={page}"
                 Actor.log.info(f"Scraping page {page}: {url}")
@@ -127,7 +127,7 @@ async def main() -> None:
                 }
 
                 try:
-                    response = await client.get(url, headers=headers)
+                    response = await client.get(url, headers=headers, impersonate="chrome110")
                     
                     if response.status_code == 404:
                         Actor.log.warning(f"Page {page} returned 404. Stopping scrape.")
