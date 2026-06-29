@@ -121,9 +121,9 @@ async def main() -> None:
                         }
                     
                     # Pass proxies to AsyncSession constructor (correct plural dict param)
-                    # Let curl_cffi auto-impersonate chrome110 which works very well
+                    # Let curl_cffi auto-impersonate safari15_5 which works very well against CloudFront WAF
                     async with curl_requests.AsyncSession(proxies=current_proxies, timeout=15.0) as client:
-                        response = await client.get(url, impersonate="chrome110")
+                        response = await client.get(url, impersonate="safari15_5")
                     
                     if response.status_code == 200:
                         if "__NEXT_DATA__" in response.text:
